@@ -3,7 +3,7 @@ CXXFLAGS = -g -Wall -std=c++11 -O2 -fopenmp
 
 INC = -I$(DYNINST_ROOT)/include
 LIB = -L$(DYNINST_ROOT)/lib
-DEP = -lparseAPI -linstructionAPI -lsymtabAPI -lcommon -lboost_system -lpthread -fopenmp -l
+DEP = -lparseAPI -linstructionAPI -lsymtabAPI -lcommon -lboost_system -lpthread -fopenmp -ltbbmalloc_proxy
 
 all: BinFeat
 
