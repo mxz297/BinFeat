@@ -74,4 +74,10 @@ protected:
 
 };
 
+class RegisterLivenessAnalyzer : public FeatureAnalyzer {
+    void AnalyzeSlice(ParseAPI::Block*, ParseAPI::Function*);
+protected:
+    virtual void ProduceAFunction(InstanceDataType*);
+
+};
 #endif

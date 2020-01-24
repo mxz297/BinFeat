@@ -11,6 +11,7 @@
 typedef enum {
     Idiom,
     Graphlet,
+    Liveness,
     UNKNOWN
 } FeatureType;
 
@@ -23,6 +24,7 @@ using namespace Dyninst::SymtabAPI;
 void InitFeatureMap() {
     featureMap[string("idiom")] = Idiom;
     featureMap[string("graphlet")] = Graphlet;
+    featureMap[string("liveness")] = Liveness;
 }
 
 void PrintCodeRange(char *bPath, char *oPre) {
@@ -67,14 +69,17 @@ int main(int argc, char **argv){
 
     switch (f) {
         case Idiom:
-	    featAnalyzer = new IdiomAnalyzer();
-	    break;
-	case Graphlet:
-	    featAnalyzer = new GraphletAnalyzer(true);
-	    break;
-	default: 
-	    PrintCodeRange(argv[1], argv[4]);
-	    return 0;
+            featAnalyzer = new IdiomAnalyzer();
+            break;
+        case Graphlet:
+            featAnalyzer = new GraphletAnalyzer(true);
+            break;
+        case Liveness:
+            featAnalyzer = new RegisterLivenessAnalyzer();
+            break;
+        default: 
+            PrintCodeRange(argv[1], argv[4]);
+            return 0;
     }
 
     featAnalyzer->Setup(argv[1], featSize, argv[4]);

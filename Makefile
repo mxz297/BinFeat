@@ -17,7 +17,8 @@ SRC = feature.cpp\
       colors.cpp\
       FeatureAnalyzer.cpp\
       IdiomAnalyzer.cpp\
-      GraphletAnalyzer.cpp
+      GraphletAnalyzer.cpp\
+	  RegisterLivenessAnalyzer.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
