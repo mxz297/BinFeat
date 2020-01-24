@@ -54,6 +54,7 @@ unsigned short node_branch_color(Block * A)
     
     Block::Insns insns;
     A->getInsns(insns);
+    if (insns.empty()) return ret;
     BranchColor::branch_color c = BranchColor::lookup(insns.rbegin()->second);    
     ret = c; 
     return ret; 

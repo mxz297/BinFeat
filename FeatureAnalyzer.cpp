@@ -5,6 +5,9 @@
 #include "CodeSource.h"
 #include <thread>
 
+#include <mutex>
+std::mutex consumeMutex;
+
 using namespace std;
 
 struct FuncSort {
@@ -28,12 +31,7 @@ FeatureAnalyzer::FeatureAnalyzer() {}
 
 void FeatureAnalyzer::Analyze() {
     featFile = fopen(string(outPrefix + ".instances").c_str(), "w");
-    std::thread t1(&FeatureAnalyzer::Consume, this);
-    std::thread t2(&FeatureAnalyzer::Produce, this);
-    t2.join();
-    q.finish();
-    t1.join();    
-
+    Produce();
     fclose(featFile);
     PrintFeatureList();
 
@@ -69,18 +67,14 @@ int FeatureAnalyzer::GetFeatureIndex(const std::string &feat) {
     }
 }
 
-void FeatureAnalyzer::Consume() {
-    while (true) {
-        InstanceDataType* it = (InstanceDataType*) q.dequeue();
-        if (it == NULL) break;
-        fprintf(featFile, "%lx", it->f->addr());
-        for (auto pair : it->featPair) {
-            int index = GetFeatureIndex(pair.first);
-            fprintf(featFile, " %d:%.3lf", index, pair.second);
-        }
-        fprintf(featFile, "\n");
-        delete it;
+void FeatureAnalyzer::Consume(InstanceDataType* it) {
+    const std::lock_guard<std::mutex> lock(consumeMutex);
+    fprintf(featFile, "%lx", it->f->addr());
+    for (auto pair : it->featPair) {
+        int index = GetFeatureIndex(pair.first);
+        fprintf(featFile, " %d:%.3lf", index, pair.second);
     }
+    fprintf(featFile, "\n");
 }
 
 void FeatureAnalyzer::Produce() {
@@ -90,13 +84,15 @@ void FeatureAnalyzer::Produce() {
             fvec.push_back(*fit);
     }
     sort(fvec.begin(), fvec.end(), FuncSort());
+//    fprintf(stderr, "total function %d\n", fvec.size());
 
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < fvec.size(); ++i) {
-        InstanceDataType* idt = new InstanceDataType();
-        idt->f = fvec[i];
-        ProduceAFunction(idt);
-        q.enqueue((void*)idt);
+//        fprintf(stderr, "current function %s at %lx\n", fvec[i]->name().c_str(), fvec[i]->addr());
+        InstanceDataType idt;
+        idt.f = fvec[i];
+        ProduceAFunction(&idt);
+        Consume(&idt);
     }
 }
 

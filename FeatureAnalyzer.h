@@ -9,7 +9,6 @@
 #include "BPatch.h"
 
 #include "feature.h"
-#include "FeatureQueue.h"
 
 #include <set>
 #include <string>
@@ -38,8 +37,6 @@ protected:
     Dyninst::ParseAPI::CodeObject *co;
     bool InTextSection(Dyninst::ParseAPI::Function *f);
 
-    FeatureQueue q;
-
     typedef unordered_map<std::string, int> FeatureIndexType;
     FeatureIndexType featureIndex;
 
@@ -54,11 +51,9 @@ public:
     // set the wanted feature size, and the prefix of the output files
     int Setup(const char *binPath, int featSize, const char *outPrefix);
     void Analyze(); 
-    FeatureAnalyzer();
-
-    void Consume();
     void Produce();
-
+    void Consume(InstanceDataType*);
+    FeatureAnalyzer();
 };
 
 class IdiomAnalyzer : public FeatureAnalyzer {

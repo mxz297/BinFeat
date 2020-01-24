@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <unordered_map>
 
 #include "colors.h"
 #include "graphlet.h"
@@ -84,8 +85,8 @@ class graph {
     std::vector<edge*> const& edges() const { return edges_; }
     std::vector<snode*> const& nodes() const { return nodes_; }
 
-    void mkgraphlets(std::map<graphlet,int> & cnts,bool docolor, bool doanon);
-    void mkgraphlets_new(int size, std::map<graphlet,int> & cnts,bool docolor, bool doanon);
+    void mkgraphlets(unordered_map<std::string,int> & cnts,bool docolor, bool doanon);
+    void mkgraphlets_new(int size, unordered_map<std::string,int> & cnts,bool docolor, bool doanon);
 
     node edge_sets(snode *A, snode *B, snode *C, bool docolor, bool doanon);
     node edge_sets(snode *A, std::set<snode*> &nodes, bool docolor, bool doanon);
@@ -101,7 +102,7 @@ class graph {
 			     std::set<snode*> &neighbors,
 			     std::set<snode*> &cur,
 			     int size,
-			     std::map<graphlet,int> &counts,
+			     unordered_map<std::string,int> &counts,
 			     bool docolor, bool doanon);
 };
 

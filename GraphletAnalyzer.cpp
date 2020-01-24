@@ -91,7 +91,7 @@ func_to_graph(ParseAPI::Function * f, dyn_hash_map<Address,bool> & seen, ColorTy
 
 void GraphletAnalyzer::ProduceAFunction(InstanceDataType* idt) {
     ParseAPI::Function *f = idt->f;
-    map<graphlet,int> c1, c2;
+    unordered_map<string,int> c1, c2;
     dyn_hash_map<Address, bool> visited;
     
     // Instruction graphlet
@@ -107,12 +107,12 @@ void GraphletAnalyzer::ProduceAFunction(InstanceDataType* idt) {
     
     // Generate graphlet string representation
     for (auto pair : c1){
-        string f = "G_" + (pair.first).compact(color);
+        string f = "G_" + pair.first;
         idt->featPair[f] += pair.second;
     }  
     
     for (auto pair : c2){
-        string f = "B_" + (pair.first).compact(color);
+        string f = "B_" + pair.first;
         idt->featPair[f] += pair.second;
     }
 }

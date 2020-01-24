@@ -249,7 +249,7 @@ graph::edge_sets(snode * A, snode * B, snode * C,bool docolor, bool doanon)
 }
 
 void
-graph::mkgraphlets(std::map<graphlet,int> & counts,bool docolor, bool doanon)
+graph::mkgraphlets(unordered_map<string,int> & counts,bool docolor, bool doanon)
 {
     // Foreach node in the graph
     //   for each pair of its neighboring nodes
@@ -278,14 +278,14 @@ graph::mkgraphlets(std::map<graphlet,int> & counts,bool docolor, bool doanon)
             B=A;++B;
             for( ; B != srcs.end(); ++B) {
                 graphlet g;
-		set<snode*> nodes;
-		nodes.insert(*A);
-		nodes.insert(*B);
-		nodes.insert(n);
+                set<snode*> nodes;
+                nodes.insert(*A);
+                nodes.insert(*B);
+                nodes.insert(n);
                 g.addNode( edge_sets(*A,nodes,docolor,doanon) );
                 g.addNode( edge_sets(*B,nodes,docolor,doanon) );
                 g.addNode( edge_sets(n,nodes,docolor,doanon) );
-                counts[g] += 1; 
+                counts[g.compact(docolor)] += 1; 
                 
                 //printf("1 made graphlet size %d %s\n",g.size(),g.toString().c_str());
             }
@@ -296,14 +296,14 @@ graph::mkgraphlets(std::map<graphlet,int> & counts,bool docolor, bool doanon)
             B=A;++B;
             for( ; B!=trgs.end();++B) {
                 graphlet g;
-		set<snode*> nodes;
-		nodes.insert(*A);
-		nodes.insert(*B);
-		nodes.insert(n);
+                set<snode*> nodes;
+                nodes.insert(*A);
+                nodes.insert(*B);
+                nodes.insert(n);
                 g.addNode( edge_sets(*A,nodes,docolor,doanon) );
                 g.addNode( edge_sets(*B,nodes,docolor,doanon) );
                 g.addNode( edge_sets(n,nodes,docolor,doanon) );
-		counts[g] += 1; 
+                counts[g.compact(docolor)] += 1; 
                 //printf("2 made graphlet size %d %s\n",g.size(),g.toString().c_str());
             }
         }
@@ -314,14 +314,14 @@ graph::mkgraphlets(std::map<graphlet,int> & counts,bool docolor, bool doanon)
                 if(*A == *B)
                     continue;
                 graphlet g;
-		set<snode*> nodes;
-		nodes.insert(*A);
-		nodes.insert(*B);
-		nodes.insert(n);
+                set<snode*> nodes;
+                nodes.insert(*A);
+                nodes.insert(*B);
+                nodes.insert(n);
                 g.addNode( edge_sets(*A,nodes,docolor,doanon) );
                 g.addNode( edge_sets(*B,nodes,docolor,doanon) );
                 g.addNode( edge_sets(n,nodes,docolor,doanon) );
-                counts[g] += 1; 
+                counts[g.compact(docolor)] += 1; 
                 //printf("3 made graphlet size %d %s\n",g.size(),g.toString().c_str());
             }
         }
@@ -332,20 +332,19 @@ void graph::enumerate_subgraphs(std::set<snode*> &notConsidered,
 				std::set<snode*> &neighbors,
 				std::set<snode*> &cur,
 				int size,
-				std::map<graphlet, int> &counts,
+				unordered_map<string, int> &counts,
 				bool docolor, bool doanon) 
 {
     if ((int)cur.size() == size) {
         graphlet g;
-	for (auto nit = cur.begin(); nit != cur.end(); ++nit) {
-	    snode * cur_node = *nit;
-	    g.addNode(edge_sets(cur_node, cur, docolor,doanon) );
-	}
-	++counts[g];
-	return;
+        for (auto nit = cur.begin(); nit != cur.end(); ++nit) {
+            snode * cur_node = *nit;
+            g.addNode(edge_sets(cur_node, cur, docolor,doanon) );
+        }
+        ++counts[g.compact(docolor)];
+        return;
     }
     if ((int)cur.size() + (int)notConsidered.size() < size) return;
-
     snode* chosen = NULL;
     if (cur.size() == 0)
         chosen = *(notConsidered.begin());
@@ -373,48 +372,45 @@ void graph::enumerate_subgraphs(std::set<snode*> &notConsidered,
 }
 
 
-void graph::mkgraphlets_new(int size, std::map<graphlet,int> & counts,bool docolor, bool doanon)
+void graph::mkgraphlets_new(int size, unordered_map<std::string,int> & counts,bool docolor, bool doanon)
 {
     if (size > 3) {
-	set<snode*> cur, neighbors, notConsidered;
-	notConsidered.insert(nodes_.begin(), nodes_.end());
+        set<snode*> cur, neighbors, notConsidered;
+        notConsidered.insert(nodes_.begin(), nodes_.end());
         if (notConsidered.size() > 5000) return;
-	enumerate_subgraphs(notConsidered, neighbors, cur, size, counts, docolor, doanon);
+        enumerate_subgraphs(notConsidered, neighbors, cur, size, counts, docolor, doanon);
     } else if (size == 3) {
         mkgraphlets(counts,docolor,doanon);
     } else if (size == 2) {
         for(unsigned i=0; i< nodes().size(); ++i) {
-	    snode * n = nodes()[i];
+            snode * n = nodes()[i];
             std::set<snode*> trgs;
-	    for(unsigned j=0;j<n->outs().size();++j) {
-	        if(n->outs()[j]->trg() != n)
-		    trgs.insert(n->outs()[j]->trg());
-	    }
-	    
-	    std::set<snode*>::iterator A;
-	    for(A=trgs.begin();A!=trgs.end();++A) {
-	        graphlet g;
-		set<snode*> nodes;
-		nodes.insert(*A);
-		nodes.insert(n);
+            for(unsigned j=0;j<n->outs().size();++j) {
+                if(n->outs()[j]->trg() != n)
+                    trgs.insert(n->outs()[j]->trg());
+            }
+            
+            std::set<snode*>::iterator A;
+            for(A=trgs.begin();A!=trgs.end();++A) {
+                graphlet g;
+                set<snode*> nodes;
+                nodes.insert(*A);
+                nodes.insert(n);
                 g.addNode( edge_sets(*A, nodes, docolor, doanon) );
                 g.addNode( edge_sets(n, nodes, docolor, doanon) );
-                counts[g] += 1; 
+                counts[g.compact(docolor)] += 1; 
             }
         } 
     } else if (size == 1) {
         for(unsigned i=0; i< nodes().size(); ++i) {
-	    snode * n = nodes()[i];
-	    graphlet g;
-	    set<snode*> nodes;
-	    nodes.insert(n);
-	    g.addNode( edge_sets(n, nodes, docolor,doanon) );
-            counts[g] += 1; 
+            snode * n = nodes()[i];
+            graphlet g;
+            set<snode*> nodes;
+            nodes.insert(n);
+            g.addNode( edge_sets(n, nodes, docolor,doanon) );
+            counts[g.compact(docolor)] += 1; 
         } 
-
-    }
-
-    
+    }    
 }
 
 node graph::edge_sets(snode * A, set<snode*> &nodes, bool docolor, bool doanon)
