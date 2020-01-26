@@ -1,25 +1,7 @@
 #include "FeatureAnalyzer.h"
 
-#include "Instruction.h"
-#include "InstructionDecoder.h"
-#include "Operand.h"
-#include "Visitor.h"
-#include "Expression.h"
-#include "BinaryFunction.h"
-#include "Register.h"
-#include "stackanalysis.h"
-#include "Immediate.h"
-#include "Result.h"
-
 #include "liveness.h"
 #include "bitArray.h"
-#include "Location.h"
-
-#include "slicing.h"
-#include "Absloc.h"
-#include "AbslocInterface.h"
-#include "Graph.h"
-#include "Node.h"
 
 using namespace std;
 using namespace Dyninst;
