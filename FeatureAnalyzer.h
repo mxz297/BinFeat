@@ -9,6 +9,7 @@
 #include "BPatch.h"
 
 #include "feature.h"
+#include "FeatureQueue.h"
 
 #include <set>
 #include <string>
@@ -36,6 +37,7 @@ protected:
 
     Dyninst::ParseAPI::CodeObject *co;
     bool InTextSection(Dyninst::ParseAPI::Function *f);
+    FeatureQueue q;
 
     typedef unordered_map<std::string, int> FeatureIndexType;
     FeatureIndexType featureIndex;
@@ -52,7 +54,7 @@ public:
     int Setup(const char *binPath, int featSize, const char *outPrefix);
     void Analyze(); 
     void Produce();
-    void Consume(InstanceDataType*);
+    void Consume();
     FeatureAnalyzer();
 };
 
