@@ -77,9 +77,21 @@ protected:
 };
 
 class RegisterLivenessAnalyzer : public FeatureAnalyzer {
-    void AnalyzeSlice(ParseAPI::Block*, ParseAPI::Function*);
 protected:
     virtual void ProduceAFunction(InstanceDataType*);
 
 };
+
+class StackHeightAnalyzer : public FeatureAnalyzer {
+protected:
+    virtual void ProduceAFunction(InstanceDataType*);
+
+};
+
+class SlicingAnalyzer : public FeatureAnalyzer {
+protected:
+    virtual void ProduceAFunction(InstanceDataType*);
+
+};
+
 #endif

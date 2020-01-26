@@ -19,7 +19,9 @@ SRC = feature.cpp\
       IdiomAnalyzer.cpp\
       GraphletAnalyzer.cpp\
 	  RegisterLivenessAnalyzer.cpp \
-	  FeatureQueue.cpp
+	  StackHeightAnalyzer.cpp \
+	  SlicingAnalyzer.cpp \
+	  FeatureQueue.cpp 
 
 OBJ = $(SRC:.cpp=.o)
 
