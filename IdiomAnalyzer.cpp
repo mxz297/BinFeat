@@ -6,6 +6,7 @@ using namespace Dyninst;
 using namespace Dyninst::ParseAPI;
 
 void IdiomAnalyzer::ProduceAFunction(InstanceDataType* idt) {
+    int featSize = 3;
     ParseAPI::Function *f = idt->f;
 	FeatureVector fv;
 	fv.eval(featSize,f,true,false);

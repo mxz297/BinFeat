@@ -90,6 +90,7 @@ func_to_graph(ParseAPI::Function * f, dyn_hash_map<Address,bool> & seen, ColorTy
 }
 
 void GraphletAnalyzer::ProduceAFunction(InstanceDataType* idt) {
+    int featSize = 2;
     ParseAPI::Function *f = idt->f;
     unordered_map<string,int> c1, c2;
     dyn_hash_map<Address, bool> visited;

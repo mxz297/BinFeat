@@ -15,7 +15,7 @@ SRC = feature.cpp\
       graphlet.cpp\
       supergraph.cpp\
       colors.cpp\
-      FeatureAnalyzer.cpp\
+      FeatureManager.cpp\
       IdiomAnalyzer.cpp\
       GraphletAnalyzer.cpp\
 	  RegisterLivenessAnalyzer.cpp \

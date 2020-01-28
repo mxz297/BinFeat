@@ -27,6 +27,12 @@ using namespace Dyninst::ParseAPI;
 using namespace Dyninst::InstructionAPI;
 using namespace Dyninst::DataflowAPI;
 
+struct AssignmentSort {
+    bool operator() (Assignment::Ptr a, Assignment::Ptr b) {
+        return a->addr() < b->addr();
+    }
+};
+
 static int SliceDepthAndDep(GraphPtr slice, unordered_map<string, double>& dataDep) {
     NodeIterator nbegin, nend;
     slice->exitNodes(nbegin, nend);
@@ -76,50 +82,50 @@ void SlicingAnalyzer::ProduceAFunction(InstanceDataType* idt) {
     int totalNodes = 0;
     int sumDepth = 0;
     
-    AssignmentConverter ac(true, true);
+    AssignmentConverter ac(true, false);
+    vector<Assignment::Ptr> assignList;
+    set<Assignment::Ptr, AssignmentPtrValueComp> internal;
 
 	for (auto b: f->blocks()) {
-        try {
-            Block::Insns insns;
-            b->getInsns(insns);
-            vector<Assignment::Ptr> assignList;
-            set<Assignment::Ptr, AssignmentPtrValueComp> internal;
-            for (auto iit : insns) {
-                Instruction i = iit.second;
-                Address addr = iit.first;
-                vector<Assignment::Ptr> assigns;
-                ac.convert(i, addr, f, b, assigns);
-                assignList.insert(assignList.end(), assigns.begin(), assigns.end());
-            }
-            
-            for (auto ait = assignList.rbegin(); ait != assignList.rend(); ++ait) {
-                Assignment::Ptr assign = *ait;
-                if (internal.find(assign) != internal.end()) continue;
-                Slicer s(assign, b , f, &ac);
-                Slicer::Predicates p;
-                Graph::Ptr slice = s.backwardSlice(p);
-                ++totalSlices;
+        Block::Insns insns;
+        b->getInsns(insns);
+        for (auto iit : insns) {
+            Instruction i = iit.second;
+            Address addr = iit.first;
+            vector<Assignment::Ptr> assigns;
+            ac.convert(i, addr, f, b, assigns);
+            assignList.insert(assignList.end(), assigns.begin(), assigns.end());
+        }
+    }
+    sort(assignList.begin(), assignList.end(), AssignmentSort());
+    
+//    for (auto ait = assignList.rbegin(); ait != assignList.rend(); ++ait) {
+//        assignment::ptr assign = *ait;
+        Assignment::Ptr assign = *(assignList.rbegin());
 
-                NodeIterator nbegin, nend;
-                slice->allNodes(nbegin, nend);
-                int realNodes = 0;
-                for (; nbegin != nend; ++nbegin) {
-                    SliceNode::Ptr sn = boost::static_pointer_cast<SliceNode>(*nbegin);
-                    if (sn->assign()) {
-                        realNodes++;
-                        internal.insert(sn->assign());
-                    }
-                }
-                int sliceDepth = SliceDepthAndDep(slice, idt->featPair);
-                if (sliceDepth > maxDepth) maxDepth = sliceDepth;
-                sumDepth += sliceDepth;
-                totalNodes += realNodes;
-                if (maxNodes < realNodes) maxNodes = realNodes;
+//        if (internal.find(assign) != internal.end()) continue;
+        Slicer s(assign, assign->block() , f, &ac);
+        Slicer::Predicates p;
+        Graph::Ptr slice = s.backwardSlice(p);
+        ++totalSlices;
+        
+        NodeIterator nbegin, nend;
+        slice->allNodes(nbegin, nend);
+        int realNodes = 0;
+        for (; nbegin != nend; ++nbegin) {
+            SliceNode::Ptr sn = boost::static_pointer_cast<SliceNode>(*nbegin);
+            if (sn->assign()) {
+                realNodes++;
+                internal.insert(sn->assign());
             }
-	    } catch (exception &e)
-	    {
-	    }
-	}
+        }
+        
+        int sliceDepth = SliceDepthAndDep(slice, idt->featPair);
+        if (sliceDepth > maxDepth) maxDepth = sliceDepth;
+        sumDepth += sliceDepth;
+        totalNodes += realNodes;
+        if (maxNodes < realNodes) maxNodes = realNodes;
+//    }
     idt->featPair["TOTAL_SLICES"] = totalSlices;
     idt->featPair["MAX_SLICE_NODE_COUNT"] = maxNodes;
     if (totalSlices > 0)
